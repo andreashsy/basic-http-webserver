@@ -52,20 +52,6 @@ public class Main {
         HttpServer server = new HttpServer();
         server.docRootCheck(docRoot);
 
-        /* for (String path: docRoot) {
-            Path filePath = Paths.get(path);
-            if (!Files.exists(filePath)){
-                System.out.println("Path does not exist: " + path);
-                System.exit(1);
-            } else if (!Files.isDirectory(filePath)) {
-                System.out.println("Path is not a directory: " + path);
-                System.exit(1);
-            } else if (false) { // TODO: path readable check
-                System.out.println("Path is not readable: " + path);
-                System.exit(1);
-            }
-        } */
-
         //get resources
         for (String path: docRoot) {
             File[] files = new File(path).listFiles();
@@ -73,13 +59,11 @@ public class Main {
                 if (file.isFile()) {
                     resources.add(path + "/" + file.getName());
                 }
-            }
-    
+            }    
         }
         System.out.println("Resources: " + resources);
 
         ExecutorService threadPool = Executors.newFixedThreadPool(3);
-
         try (ServerSocket serversocket = new ServerSocket(port)) {
 
             while (true) {
@@ -91,32 +75,6 @@ public class Main {
                 System.out.println("Worker submitted!");
 
             }
-            
-            
         }
-   
-
-        /* HttpClientConnection worker = new HttpClientConnection(port, socket, resources);
-        Thread mythread = new Thread(worker);
-        mythread.start(); */
-
-/*     ExecutorService threadPool = Executors.newFixedThreadPool(3);
-    ServerSocket serversocket = new ServerSocket(port);
-    System.out.println("Threadpool created, waiting...");
-
-    try {
-        while (true) {
-            Socket socket = serversocket.accept();
-            System.out.println("Client connected...");
-            HttpClientConnection worker = new HttpClientConnection(port, socket, resources);
-            threadPool.submit(worker);
-            System.out.println("Worker submitted!");
-        }
-
-    } finally {
-        System.out.println("Closing sockets..");
-        serversocket.close();
-    } */
-
     }
 }

@@ -25,15 +25,11 @@ public class HttpClientConnection implements Runnable {
         
 
         try (OutputStream os = socket.getOutputStream(); InputStream is = socket.getInputStream()) {
-
-            //BufferedInputStream bis = new BufferedInputStream(is);
-            //DataInputStream dis = new DataInputStream(bis);
             BufferedOutputStream bos = new BufferedOutputStream(os);
             DataOutputStream dos = new DataOutputStream(bos);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-            //String line = dis.readUTF();
             String line = in.readLine();
             System.out.println("Client said: " + line);
             if (line.indexOf(" ") == -1) {
@@ -97,9 +93,7 @@ public class HttpClientConnection implements Runnable {
                 byte[] data = new byte[(int) file.length()];
                 fis.read(data);
                 fis.close();
-                DataOutputStream binaryOut = new DataOutputStream(os);
-               
-
+                DataOutputStream binaryOut = new DataOutputStream(os);              
                 PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                 binaryOut.writeBytes("HTTP/1.1 200 OK \r\n");
                 binaryOut.writeBytes("Content-Type: image/png \r\n");
