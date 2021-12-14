@@ -77,10 +77,19 @@ public class Main {
             }
     
         }
-        System.out.println(resources);
+        System.out.println("Resources: " + resources);
+
+
+        ServerSocket serversocket = new ServerSocket(port);
+        Socket socket = serversocket.accept();
+        HttpClientConnection worker = new HttpClientConnection(port, socket, resources);
+        Thread mythread = new Thread(worker);
+        mythread.start();
+
     
 
-    ExecutorService threadPool = Executors.newFixedThreadPool(3);
+
+/*     ExecutorService threadPool = Executors.newFixedThreadPool(3);
     ServerSocket serversocket = new ServerSocket(port);
     System.out.println("Threadpool created, waiting...");
 
@@ -90,13 +99,13 @@ public class Main {
             System.out.println("Client connected...");
             HttpClientConnection worker = new HttpClientConnection(port, socket, resources);
             threadPool.submit(worker);
+            System.out.println("Worker submitted!");
         }
 
     } finally {
-        //socket.close();
-        System.out.println("Closing socket..");
+        System.out.println("Closing sockets..");
         serversocket.close();
-    }
+    } */
 
     }
 }
