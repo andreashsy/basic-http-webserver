@@ -107,23 +107,17 @@ public class HttpClientConnection implements Runnable {
                 File file = new File(targetResourcePath.toString());
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-                // byte[] filecontent = Files.readAllBytes(targetResourcePath);
                 System.out.println("Sending file...");
-                out.write("HTTP/1.1 200 OK \r\n");
-                out.write("\r\n");
+                printWriter.write("HTTP/1.1 200 OK \r\n");
+                printWriter.write("\r\n");
                 String l = reader.readLine();
                 while (l != null) {
-                    printWriter.println(line);// print current line
-                    line = reader.readLine();// read next line
+                    printWriter.println(l);// print current line
+                    l = reader.readLine();// read next line
                 }
                 reader.close();
                 printWriter.close();
-                //os.write(filecontent, 0, filecontent.length);
-                //os.flush();
-            } 
-
-            
-
+            }
             
 
     } catch (IOException ioe) {
