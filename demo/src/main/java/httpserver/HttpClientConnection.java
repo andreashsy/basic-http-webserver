@@ -92,8 +92,7 @@ public class HttpClientConnection implements Runnable {
                 DataOutputStream binaryOut = new DataOutputStream(os);              
                 binaryOut.writeBytes("HTTP/1.1 200 OK \r\n");
                 binaryOut.writeBytes("Content-Type: image/png \r\n");
-                binaryOut.writeBytes("Content-Length: " + data.length);
-                binaryOut.writeBytes("\r\n\r\n");
+                binaryOut.writeBytes("\r\n");
                 binaryOut.write(data);
                 printWriter.close();
                                    
