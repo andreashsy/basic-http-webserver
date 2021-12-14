@@ -11,8 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
-
-
     public static void main( String[] args ) throws IOException{
 
         List<String> docRoot = new ArrayList<>();
@@ -47,12 +45,10 @@ public class Main {
         System.out.println("Document root is: " + docRoot);
         System.out.println("Port is " + port);
 
-
         //docRoot check
-        HttpServer server = new HttpServer();
-        server.docRootCheck(docRoot);
-
-        //get resources
+        HttpServer.docRootCheck(docRoot);
+        
+        //saves docRoot into resources
         for (String path: docRoot) {
             File[] files = new File(path).listFiles();
             for (File file: files) {
@@ -67,7 +63,6 @@ public class Main {
         try (ServerSocket serversocket = new ServerSocket(port)) {
 
             while (true) {
-
                 Socket socket = serversocket.accept();
                 System.out.println("Client connected!");
                 HttpClientConnection worker = new HttpClientConnection(port, socket, resources);

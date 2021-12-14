@@ -23,19 +23,15 @@ public class HttpClientConnection implements Runnable {
     public void run() {
         System.out.println("ClientConnection starting...");
         
-
         try (OutputStream os = socket.getOutputStream(); InputStream is = socket.getInputStream()) {
-            BufferedOutputStream bos = new BufferedOutputStream(os);
-            DataOutputStream dos = new DataOutputStream(bos);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(is));
+            PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
 
             String line = in.readLine();
             System.out.println("Client said: " + line);
             if (line.indexOf(" ") == -1) {
                 System.out.println("Invalid Argument");
-                dos.writeUTF("Invalid Argument, closing connection...");
-                dos.flush();
+                printWriter.write("Invalid Argument, closing connection...");
                 socket.close();
             }
             String methodName = line.split(" ")[0];
@@ -48,14 +44,14 @@ public class HttpClientConnection implements Runnable {
             
             // if not a GET method
             if (!(methodName.equals("GET"))) {
-                out.write("HTTP/1.1 405 Method Not Allowed\r\n");
-                out.write("\r\n");
-                out.write(methodName + " not supported \\r\\n");
-                System.out.println("Method not supported, closing connection...");
+                printWriter.write("HTTP/1.1 405 Method Not Allowed\r\n");
+                printWriter.write("\r\n");
+                printWriter.write(methodName + " not supported \r\n");
                 socket.close();
+                throw new NoSuchMethodException(methodName + " not supported");
             }
 
-            //get name of resources without path
+            //get names of resources without path
             List<String> res = new ArrayList<String>();
             for (String resource:resources) {
                 String[] rl = resource.split("/");
@@ -66,11 +62,11 @@ public class HttpClientConnection implements Runnable {
 
             // if client requests a resource thats not found
             if (!(res.contains(resourceName))) {
-                out.write("HTTP/1.1 404 Not Found\r\n");
-                out.write("\r\n");
-                out.write(resourceName + " not found \\r\\n");
-                System.out.println("Resource not found, closing connection...");
+                printWriter.write("HTTP/1.1 404 Not Found\r\n");
+                printWriter.write("\r\n");
+                printWriter.write(resourceName + " not found\r\n");
                 socket.close();
+                throw new FileNotFoundException(resourceName + " not found");
             }
 
             // get target resource path (default is "/")
@@ -83,18 +79,17 @@ public class HttpClientConnection implements Runnable {
                     break;
                 }
             }
+            File file = new File(targetResourcePath.toString());
 
             // if resource is PNG
             if (resourceName.endsWith("png")) {
                 System.out.println("Sending PNG...");
 
-                File file = new File(targetResourcePath.toString());
                 FileInputStream fis = new FileInputStream(file);
                 byte[] data = new byte[(int) file.length()];
                 fis.read(data);
                 fis.close();
                 DataOutputStream binaryOut = new DataOutputStream(os);              
-                PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                 binaryOut.writeBytes("HTTP/1.1 200 OK \r\n");
                 binaryOut.writeBytes("Content-Type: image/png \r\n");
                 binaryOut.writeBytes("Content-Length: " + data.length);
@@ -104,9 +99,8 @@ public class HttpClientConnection implements Runnable {
                                    
             // if resource is not PNG
             } else {
-                File file = new File(targetResourcePath.toString());
+                //File file = new File(targetResourcePath.toString());
                 BufferedReader reader = new BufferedReader(new FileReader(file));
-                PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                 System.out.println("Sending file...");
                 printWriter.write("HTTP/1.1 200 OK \r\n");
                 printWriter.write("\r\n");
