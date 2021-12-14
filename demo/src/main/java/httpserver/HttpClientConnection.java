@@ -2,15 +2,19 @@ package httpserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.util.List;
 
 
 public class HttpClientConnection implements Runnable {
     int port;
     Socket socket;
+    List<String> resources;
 
-    public HttpClientConnection (int port, Socket socket) {
+    public HttpClientConnection (int port, Socket socket, List<String> resorces) {
         this.port = port;
         this.socket = socket;
+        this.resources = resources;
     }
 
     @Override
@@ -25,19 +29,38 @@ public class HttpClientConnection implements Runnable {
             DataOutputStream dos = new DataOutputStream(bos);
 
             String line = dis.readUTF();
+            String methodName = line.split(" ")[0];
+            String resourceName = line.split(" ")[1];
+            HttpWriter hw = new HttpWriter(dos);
 
-            if (!line.startsWith("GET ")) {
+
+            if (!(methodName == "GET")) {
                 dos.writeUTF("HTTP/1.1 405 Method Not Allowed\\r\\n");
                 dos.writeUTF("\\r\\n");
-                dos.writeUTF("" + line.split(" ")[0] + "not supported \\r\\n");
+                dos.writeUTF("" + methodName + "not supported \\r\\n");
                 socket.close();
             }
 
-            if () {
+            if (!(resources.contains(resourceName))) {
                 dos.writeUTF("HTTP/1.1 404 Not Found\\r\\n");
                 dos.writeUTF("\\r\\n");
-                dos.writeUTF("" + line.split(" ")[1] + "not found \\r\\n");
+                dos.writeUTF("" + resourceName + "not found \\r\\n");
                 socket.close();
+            }
+
+
+
+            if (resourceName.endsWith("\\.png")) {
+                byte[] filecontent = Files.readAllBytes(path);
+                dos.writeUTF("HTTP/1.1 200 OK\\r\\n");
+                dos.writeUTF("Content-Type: image/png \\r\\n");
+                dos.writeUTF("\\r\\n");
+                dos.writeUTF(hw.writeBytes(filecontent));
+            } else {
+                byte[] filecontent = Files.readAllBytes(path);
+                dos.writeUTF("HTTP/1.1 200 OK\\r\\n");
+                dos.writeUTF("\\r\\n");
+                dos.writeUTF(hw.writeBytes(filecontent));
             }
 
         
