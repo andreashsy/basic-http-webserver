@@ -2,13 +2,10 @@ package httpserver;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 public class HttpClientConnection implements Runnable {
     int port;
@@ -29,8 +26,8 @@ public class HttpClientConnection implements Runnable {
 
         try (OutputStream os = socket.getOutputStream(); InputStream is = socket.getInputStream()) {
 
-            BufferedInputStream bis = new BufferedInputStream(is);
-            DataInputStream dis = new DataInputStream(bis);
+            //BufferedInputStream bis = new BufferedInputStream(is);
+            //DataInputStream dis = new DataInputStream(bis);
             BufferedOutputStream bos = new BufferedOutputStream(os);
             DataOutputStream dos = new DataOutputStream(bos);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -91,17 +88,26 @@ public class HttpClientConnection implements Runnable {
                 }
             }
 
-           
             // if resource is PNG
             if (resourceName.endsWith("png")) {
-                byte[] filecontent = Files.readAllBytes(targetResourcePath);
                 System.out.println("Sending PNG...");
-                out.write("HTTP/1.1 200 OK \r\n");
-                out.write("Content-Type: image/png \\r\\n");
-                out.write("\r\n");                     
-                os.write(filecontent, 0, filecontent.length);
-                os.flush();
+
+                File file = new File(targetResourcePath.toString());
+                FileInputStream fis = new FileInputStream(file);
+                byte[] data = new byte[(int) file.length()];
+                fis.read(data);
+                fis.close();
+                DataOutputStream binaryOut = new DataOutputStream(os);
                
+
+                PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+                binaryOut.writeBytes("HTTP/1.1 200 OK \r\n");
+                binaryOut.writeBytes("Content-Type: image/png \r\n");
+                binaryOut.writeBytes("Content-Length: " + data.length);
+                binaryOut.writeBytes("\r\n\r\n");
+                binaryOut.write(data);
+                printWriter.close();
+                                   
             // if resource is not PNG
             } else {
                 File file = new File(targetResourcePath.toString());
