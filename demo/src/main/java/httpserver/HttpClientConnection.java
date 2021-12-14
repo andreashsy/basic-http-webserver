@@ -50,7 +50,7 @@ public class HttpClientConnection implements Runnable {
                 socket.close();
             }
 
-
+            // get target resource path
             System.err.println(resourceName + " Found");
             Path targetResourcePath;
             for (String res:resources) {
@@ -61,10 +61,7 @@ public class HttpClientConnection implements Runnable {
                 }
             }
 
-            
-
-
-
+            // if resource is PNG
             if (resourceName.endsWith("\\.png")) {
                 byte[] filecontent = Files.readAllBytes(targetResourcePath);
                 dos.writeUTF("HTTP/1.1 200 OK\\r\\n");
@@ -72,8 +69,7 @@ public class HttpClientConnection implements Runnable {
                 dos.writeUTF("\\r\\n");
                 hw.writeBytes(filecontent);
                
-                
-
+            // if resource is not PNG
             } else {
                 byte[] filecontent = Files.readAllBytes(targetResourcePath);
                 dos.writeUTF("HTTP/1.1 200 OK\\r\\n");
@@ -81,8 +77,6 @@ public class HttpClientConnection implements Runnable {
                 hw.writeBytes(filecontent);
             }
 
-        
-        
     } catch (IOException ioe) {
         System.out.println(ioe);
     } catch (Exception e) {
