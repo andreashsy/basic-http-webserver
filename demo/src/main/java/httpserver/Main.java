@@ -15,7 +15,6 @@ public class Main {
 
     public static void main( String[] args ) throws IOException{
 
-        System.out.println( "Hello World!" );
         List<String> docRoot = new ArrayList<>();
         int port = 3000;
         List<String> argList = new ArrayList<>(Arrays.asList(args));
@@ -72,22 +71,34 @@ public class Main {
             File[] files = new File(path).listFiles();
             for (File file: files) {
                 if (file.isFile()) {
-                    resources.add(path + "\\" + file.getName());
+                    resources.add(path + "/" + file.getName());
                 }
             }
     
         }
         System.out.println("Resources: " + resources);
 
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
 
-        ServerSocket serversocket = new ServerSocket(port);
-        Socket socket = serversocket.accept();
-        HttpClientConnection worker = new HttpClientConnection(port, socket, resources);
+        try (ServerSocket serversocket = new ServerSocket(port)) {
+
+            while (true) {
+
+                Socket socket = serversocket.accept();
+                System.out.println("Client connected!");
+                HttpClientConnection worker = new HttpClientConnection(port, socket, resources);
+                threadPool.submit(worker);
+                System.out.println("Worker submitted!");
+
+            }
+            
+            
+        }
+   
+
+        /* HttpClientConnection worker = new HttpClientConnection(port, socket, resources);
         Thread mythread = new Thread(worker);
-        mythread.start();
-
-    
-
+        mythread.start(); */
 
 /*     ExecutorService threadPool = Executors.newFixedThreadPool(3);
     ServerSocket serversocket = new ServerSocket(port);

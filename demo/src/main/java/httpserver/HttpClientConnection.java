@@ -50,8 +50,7 @@ public class HttpClientConnection implements Runnable {
             System.out.println("Method: " + methodName);
             System.out.println("Resource: " + resourceName);
             
-
-
+            // if not a GET method
             if (!(methodName.equals("GET"))) {
                 dos.writeUTF("HTTP/1.1 405 Method Not Allowed \\r\\n\\r\\n " + methodName + " not supported \\r\\n");
                 dos.flush();
@@ -59,15 +58,16 @@ public class HttpClientConnection implements Runnable {
                 socket.close();
             }
 
+            //get name of resources without path
             List<String> res = new ArrayList<String>();
             for (String resource:resources) {
-                System.out.println("Splitting " + resource);
-                String[] rl = resource.split("\\\\");
+                String[] rl = resource.split("/");
                 String ele = rl[rl.length -1];
                 res.add(ele);
             }
             System.out.println("Resource names: " + res);
 
+            // if client requests a resource thats not found
             if (!(res.contains(resourceName))) {
                 dos.writeUTF("HTTP/1.1 404 Not Found \\r\\n\\r\\n " + resourceName + " not found \\r\\n");
                 dos.flush();
@@ -75,7 +75,7 @@ public class HttpClientConnection implements Runnable {
                 socket.close();
             }
 
-            // get target resource path, default is "/"
+            // get target resource path (default is "/")
             System.err.println(resourceName + " Found");
             Path targetResourcePath = Paths.get("/");
             for (String reso:resources) {
