@@ -1,8 +1,6 @@
 package httpserver;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +14,7 @@ public class Main {
         List<String> docRoot = new ArrayList<>();
         int port = 3000;
         List<String> argList = new ArrayList<>(Arrays.asList(args));
+        List<String> resources = new ArrayList<String>();
 
         //parse command line args
         if (argList.contains("--docRoot")) {
@@ -31,7 +30,10 @@ public class Main {
 
 
         //docRoot check
-        for (String path: docRoot) {
+        HttpServer server = new HttpServer();
+        server.docRootCheck(docRoot);
+
+        /* for (String path: docRoot) {
             Path filePath = Paths.get(path);
             if (!Files.exists(filePath)){
                 System.out.println("Path does not exist: " + path);
@@ -39,14 +41,24 @@ public class Main {
             } else if (!Files.isDirectory(filePath)) {
                 System.out.println("Path is not a directory: " + path);
                 System.exit(1);
-            } else if (true) {
+            } else if (false) { // TODO: path readable check
                 System.out.println("Path is not readable: " + path);
                 System.exit(1);
             }
+        } */
+
+        
+
+        //get resources
+        for (String path: docRoot) {
+            File[] files = new File(path).listFiles();
+            for (File file: files) {
+                if (file.isFile()) {
+                    resources.add(path + "\\" + file.getName());
+                }
+            }
+    
         }
-
-        //
-
-
+        System.out.println(resources);
     }
 }

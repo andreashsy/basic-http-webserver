@@ -3,6 +3,8 @@ package httpserver;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 
@@ -11,10 +13,10 @@ public class HttpClientConnection implements Runnable {
     Socket socket;
     List<String> resources;
 
-    public HttpClientConnection (int port, Socket socket, List<String> resorces) {
+    public HttpClientConnection (int port, Socket socket, List<String> resourceList) {
         this.port = port;
         this.socket = socket;
-        this.resources = resources;
+        this.resources = resourceList;
     }
 
     @Override
@@ -35,37 +37,59 @@ public class HttpClientConnection implements Runnable {
 
 
             if (!(methodName == "GET")) {
-                dos.writeUTF("HTTP/1.1 405 Method Not Allowed\\r\\n");
-                dos.writeUTF("\\r\\n");
-                dos.writeUTF("" + methodName + "not supported \\r\\n");
+                hw.writeString("HTTP/1.1 405 Method Not Allowed\\r\\n");
+                hw.writeString("\\r\\n");
+                hw.writeString("" + methodName + "not supported \\r\\n");
                 socket.close();
             }
 
             if (!(resources.contains(resourceName))) {
-                dos.writeUTF("HTTP/1.1 404 Not Found\\r\\n");
-                dos.writeUTF("\\r\\n");
-                dos.writeUTF("" + resourceName + "not found \\r\\n");
+                hw.writeString("HTTP/1.1 404 Not Found\\r\\n");
+                hw.writeString("\\r\\n");
+                hw.writeString("" + resourceName + "not found \\r\\n");
                 socket.close();
             }
 
 
+            System.err.println(resourceName + " Found");
+            Path targetResourcePath;
+            for (String res:resources) {
+                if (res.contains(resourceName)) {
+                    targetResourcePath = Paths.get(res);
+                    System.out.println("Target Path Loaded: " + resourceName);
+                    break;
+                }
+            }
+
+            
+
+
 
             if (resourceName.endsWith("\\.png")) {
-                byte[] filecontent = Files.readAllBytes(path);
+                byte[] filecontent = Files.readAllBytes(targetResourcePath);
                 dos.writeUTF("HTTP/1.1 200 OK\\r\\n");
                 dos.writeUTF("Content-Type: image/png \\r\\n");
                 dos.writeUTF("\\r\\n");
-                dos.writeUTF(hw.writeBytes(filecontent));
+                hw.writeBytes(filecontent);
+               
+                
+
             } else {
-                byte[] filecontent = Files.readAllBytes(path);
+                byte[] filecontent = Files.readAllBytes(targetResourcePath);
                 dos.writeUTF("HTTP/1.1 200 OK\\r\\n");
                 dos.writeUTF("\\r\\n");
-                dos.writeUTF(hw.writeBytes(filecontent));
+                hw.writeBytes(filecontent);
             }
 
         
         
+    } catch (IOException ioe) {
+        System.out.println(ioe);
+    } catch (Exception e) {
+        System.out.println(e);
     }
     
     
+}
+
 }
